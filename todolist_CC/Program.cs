@@ -44,7 +44,10 @@ namespace todolist_CC
                 task = field[2];
                 taskDescription = field[3];
             }
-            public void print(bool desc) //<----------------METHOD_Print
+            /*
+             Todo.print Method VVV
+             */
+            public void print(bool desc) //<----------------METHOD_print
             {
                 string statusString = StatusToString(status);
                 Write($"|{statusString,-12}|{priority,-6}|{task,-20}|");
@@ -60,23 +63,9 @@ namespace todolist_CC
                 }
             }
         }
-        public static void ReadListFromFile() //<----------------METHOD_ReadListFromFile
-        {
-            string todoFileName = "todo.lis";
-            Write($"Läser från fil {todoFileName} ... ");
-            StreamReader sr = new StreamReader(todoFileName);
-            int numRead = 0;
-
-            string line;
-            while ((line = sr.ReadLine()) != null)
-            {
-                TodoItem item = new TodoItem(line);
-                list.Add(item);
-                numRead++;
-            }
-            sr.Close();
-            WriteLine($"Läste {numRead} rader.");
-        }
+        /*
+         Todo.Print Method VVV
+         */
         public static void Print(string command)
         {
             bool desc = false;
@@ -87,7 +76,7 @@ namespace todolist_CC
             if (arg.Length > 1 && arg[1] == "waiting") { wait = true; }
             if (arg.Length > 1 && arg[1] == "done") { done = true; }
             if (arg.Length > 1 && arg[1] == "all") { active = true; done = true; wait = true; }
-            if(arg.Length == 1) { active = true; }
+            if (arg.Length == 1) { active = true; }
             Write("|status      |prio  |namn                |");
             switch (arg[0])
             {
@@ -109,6 +98,9 @@ namespace todolist_CC
                     break;
             }
         }
+        /*
+        Todo.PrintHelp Method VVV
+        */
         public static void PrintHelp() //<----------------METHOD_Help
         {
             Console.WriteLine("Kommandon:");
@@ -116,6 +108,9 @@ namespace todolist_CC
             Console.WriteLine("lista    lista att-göra-listan");
             Console.WriteLine("sluta    spara att-göra-listan och sluta");
         }
+        /*
+        Todo.newTodo Method VVV
+        */
         public static void newTodo(string command)
         {
             string task;
@@ -133,6 +128,9 @@ namespace todolist_CC
             item.taskDescription = desc;
             list.Add(item);
         }
+        /*
+        Todo.editTodo Method VVV
+        */
         public static void editTodo(string command)
         {
             string substring = "";
@@ -152,6 +150,9 @@ namespace todolist_CC
                 }
             }
         }
+        /*
+        Todo.copyTodo Method VVV
+        */
         public static void copyTodo(string command)
         {
             string substring = "";
@@ -172,25 +173,68 @@ namespace todolist_CC
                 }
             }
         }
+        /*
+        Todo.loadTodo Method VVV
+         */
+        public static void loadTodo(string command)
+        {
+            string file = "todo.lis";
+            string[] arg = command.Split(' ');
+            if (arg.Length > 1) { file = arg[1]; }
+            Write($"Reading from file {file} ... ");
+            StreamReader sr = new StreamReader(file);
+            int numRead = 0;
+
+            string line;
+            while ((line = sr.ReadLine()) != null)
+            {
+                TodoItem item = new TodoItem(line);
+                list.Add(item);
+                numRead++;
+            }
+            sr.Close();
+            WriteLine($"Read {numRead} rows.");
+
+        }
+        /*
+        Todo.saveTodo Method VVV
+         */
+        public static void saveTodo(string command)
+        {
+            string file = "todo.lis";
+            string[] arg = command.Split(' ');
+            if (arg.Length > 1) { file = arg[1]; }
+
+            using (StreamWriter sw = new StreamWriter(file))
+            {
+                foreach (TodoItem item in list)
+                {
+                    sw.WriteLine($"{item.status}|{item.priority}|{item.task}|{item.taskDescription}");
+                }
+            }
+
+        }
     }
     class MainClass //<-------------------------------------------------------------------------------------------------------------------------MAIN/------------------------------------------------------------------------------------------------------------------------>
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("Välkommen till att-göra-listan!");
-            Todo.ReadListFromFile();
-            Todo.PrintHelp();
+
             string command;
+            Console.WriteLine("Welcome to the Todo-list");
+            Todo.loadTodo("load");
+            Todo.PrintHelp();
             do
             {
                 command = MyIO.ReadCommand("> ");
                 switch (command)
                 {
-                    case "hjälp":
+                    case "help":
                         Todo.PrintHelp();
                         break;
-                    case "sluta":
-                        Console.WriteLine("Hej då!");
+                    case "stop":
+                        Todo.saveTodo("save");
+                        Console.WriteLine("Bye");
                         break;
                     case String A when A.StartsWith("list"):
                         Todo.Print(command);
@@ -198,20 +242,15 @@ namespace todolist_CC
                         break;
                     case string A when A.StartsWith("new"): //new 'task'
                         Todo.newTodo(command);
-                        if (command == "new kekw") { WriteLine("kekw!"); }
                         break;
                     case String A when A.StartsWith("describe"): //describe 'all'
                         Todo.Print(command);
                         break;
-                    case "save":
+                    case String A when A.StartsWith("save"):
+                        Todo.saveTodo(command);
                         break;
-                    case "load":
-                        break;
-                    case "activate":
-                        break;
-                    case "done":
-                        break;
-                    case "wait":
+                    case String A when A.StartsWith("load"):
+                        Todo.loadTodo(command);
                         break;
                     case String A when A.StartsWith("edit"):
                         Todo.editTodo(command);
@@ -220,7 +259,7 @@ namespace todolist_CC
                         Todo.copyTodo(command);
                         break;
                     default:
-                        Console.WriteLine($"Okänt kommando: {command}");
+                        Console.WriteLine($"Unknown command: {command}");
                         break;
                 }
             }
