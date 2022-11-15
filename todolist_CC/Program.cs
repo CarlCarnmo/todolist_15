@@ -1,4 +1,10 @@
-﻿namespace todolist_CC
+﻿using System.ComponentModel;
+using System.Data;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using static System.Console;
+namespace todolist_CC
 {
     public class Todo
     {
@@ -38,20 +44,26 @@
                 task = field[2];
                 taskDescription = field[3];
             }
-            public void Print(bool verbose = false) //<----------------METHOD_Print
+            public void print(bool desc) //<----------------METHOD_Print
             {
                 string statusString = StatusToString(status);
-                Console.Write($"|{statusString,-12}|{priority,-6}|{task,-20}|");
-                if (verbose)
-                    Console.WriteLine($"{taskDescription,-40}|");
-                else
-                    Console.WriteLine();
+                Write($"|{statusString,-12}|{priority,-6}|{task,-20}|");
+                if (desc == true) { Write($"{taskDescription,-40}|"); }
+                WriteLine();
+            }
+            public static void prtLoop(bool desc, bool active, bool wait, bool done)
+            {
+                foreach (TodoItem item in list)
+                {
+                    if ((active && item.status == 1) || (wait && item.status == 2) || (done && item.status == 3))
+                    { item.print(desc); }
+                }
             }
         }
         public static void ReadListFromFile() //<----------------METHOD_ReadListFromFile
         {
             string todoFileName = "todo.lis";
-            Console.Write($"Läser från fil {todoFileName} ... ");
+            Write($"Läser från fil {todoFileName} ... ");
             StreamReader sr = new StreamReader(todoFileName);
             int numRead = 0;
 
@@ -63,43 +75,102 @@
                 numRead++;
             }
             sr.Close();
-            Console.WriteLine($"Läste {numRead} rader.");
+            WriteLine($"Läste {numRead} rader.");
         }
-        private static void PrintHeadOrFoot(bool head, bool verbose) ///<-------------------------------------------------------------------------------------------------------------------------METHOD_Print_extra/------------------------------------------------------------------------------------------------------------------------>
+        public static void Print(string command)
         {
-            if (head)
+            bool desc = false;
+            bool active = false;
+            bool wait = false;
+            bool done = false;
+            string[] arg = command.Split(' ');
+            if (arg.Length > 1 && arg[1] == "waiting") { wait = true; }
+            if (arg.Length > 1 && arg[1] == "done") { done = true; }
+            if (arg.Length > 1 && arg[1] == "all") { active = true; done = true; wait = true; }
+            if(arg.Length == 1) { active = true; }
+            Write("|status      |prio  |namn                |");
+            switch (arg[0])
             {
-                Console.Write("|status      |prio  |namn                |");
-                if (verbose) Console.WriteLine("beskrivning                             |");
-                else Console.WriteLine();
+                case "list":
+                    WriteLine("\n|------------|------|--------------------|");
+                    TodoItem.prtLoop(desc, active, wait, done);
+                    WriteLine("|------------|------|--------------------|");
+                    break;
+                case "describe":
+                    desc = true;
+                    WriteLine("beskrivning                             |");
+                    Write("|------------|------|--------------------|");
+                    WriteLine("----------------------------------------|");
+                    TodoItem.prtLoop(desc, active, wait, done);
+                    Write("|------------|------|--------------------|");
+                    WriteLine("----------------------------------------|");
+                    break;
+                default:
+                    break;
             }
-            Console.Write("|------------|------|--------------------|");
-            if (verbose) Console.WriteLine("----------------------------------------|");
-            else Console.WriteLine();
         }
-        private static void PrintHead(bool verbose) //<----------------METHOD_Print_extra>
-        {
-            PrintHeadOrFoot(head: true, verbose);
-        } 
-        private static void PrintFoot(bool verbose) //<----------------METHOD_Print_extra
-        {
-            PrintHeadOrFoot(head: false, verbose);
-        }
-        public static void PrintTodoList(bool verbose = false) //<----------------METHOD_Print_extra
-        {
-            PrintHead(verbose);
-            foreach (TodoItem item in list)
-            {
-                item.Print(verbose);
-            }
-            PrintFoot(verbose);
-        } //<-------------------------------------------------------------------------------------------------------------------------/METHOD_Print_extra------------------------------------------------------------------------------------------------------------------------>
         public static void PrintHelp() //<----------------METHOD_Help
         {
             Console.WriteLine("Kommandon:");
             Console.WriteLine("hjälp    lista denna hjälp");
             Console.WriteLine("lista    lista att-göra-listan");
             Console.WriteLine("sluta    spara att-göra-listan och sluta");
+        }
+        public static void newTodo(string command)
+        {
+            string task;
+            if (command.Length > 3) { string substring = command.Substring(4); task = substring; }
+            else { WriteLine("Task: "); task = ReadLine(); }
+            WriteLine("Priority(1-4): ");
+            int priority = Convert.ToInt32(ReadLine());
+            WriteLine("Status(1=Active, 2=Waiting, 3=Ready): ");
+            int status = Convert.ToInt32(ReadLine());
+            WriteLine("Description: ");
+            string desc = ReadLine();
+
+            TodoItem item = new TodoItem(priority, task);
+            item.status = status;
+            item.taskDescription = desc;
+            list.Add(item);
+        }
+        public static void editTodo(string command)
+        {
+            string substring = "";
+            if (command.Length > 4) { substring = command.Substring(5); }
+            foreach (TodoItem item in list)
+            {
+                if (item.task == substring)
+                {
+                    WriteLine("Task: ");
+                    item.task = ReadLine();
+                    WriteLine("Priority(1-4): ");
+                    item.priority = Convert.ToInt32(ReadLine());
+                    WriteLine("Status(1=Active, 2=Waiting, 3=Ready): ");
+                    item.status = Convert.ToInt32(ReadLine());
+                    WriteLine("Description: ");
+                    item.taskDescription = ReadLine();
+                }
+            }
+        }
+        public static void copyTodo(string command)
+        {
+            string substring = "";
+            if (command.Length > 4) { substring = command.Substring(5); }
+            foreach (TodoItem item in list)
+            {
+                if (item.task == substring)
+                {
+                    string newTask = item.task;
+                    int newStatus = item.status;
+                    string newTaskdesc = item.taskDescription;
+
+                    TodoItem item1 = new TodoItem(1, newTask);
+                    item.status = newStatus;
+                    item.taskDescription = newTaskdesc;
+                    list.Add(item1);
+                    break;
+                }
+            }
         }
     }
     class MainClass //<-------------------------------------------------------------------------------------------------------------------------MAIN/------------------------------------------------------------------------------------------------------------------------>
@@ -121,13 +192,16 @@
                     case "sluta":
                         Console.WriteLine("Hej då!");
                         break;
-                    case "lista":
-                    case "lista allt":
-                        Todo.PrintTodoList(verbose: MyIO.HasArgument(command, "allt"));
+                    case String A when A.StartsWith("list"):
+                        Todo.Print(command);
+                        WriteLine();
                         break;
-                    case "new": //new 'task'
+                    case string A when A.StartsWith("new"): //new 'task'
+                        Todo.newTodo(command);
+                        if (command == "new kekw") { WriteLine("kekw!"); }
                         break;
-                    case "describe": //describe 'all'
+                    case String A when A.StartsWith("describe"): //describe 'all'
+                        Todo.Print(command);
                         break;
                     case "save":
                         break;
@@ -139,9 +213,11 @@
                         break;
                     case "wait":
                         break;
-                    case "edit":
+                    case String A when A.StartsWith("edit"):
+                        Todo.editTodo(command);
                         break;
-                    case "copy":
+                    case String A when A.StartsWith("copy"):
+                        Todo.copyTodo(command);
                         break;
                     default:
                         Console.WriteLine($"Okänt kommando: {command}");
