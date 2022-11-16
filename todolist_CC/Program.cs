@@ -14,14 +14,14 @@ namespace todolist_CC
         public const int Active = 1;
         public const int Waiting = 2;
         public const int Ready = 3;
-        public static string StatusToString(int status) //<----------------METHOD_StatusToString
+        public static string StatusToString(int status)
         {
             switch (status)
             {
-                case Active: return "aktiv";
-                case Waiting: return "väntande";
-                case Ready: return "avklarad";
-                default: return "(felaktig)";
+                case Active: return "Active";
+                case Waiting: return "Waiting";
+                case Ready: return "Done";
+                default: return "Error: Status unknown";
             }
         }
         public class TodoItem
@@ -48,7 +48,7 @@ namespace todolist_CC
             /*
              Todo.print Method VVV
              */
-            public void print(bool desc) //<----------------METHOD_print
+            public void print(bool desc)
             {
                 string statusString = StatusToString(status);
                 Write($"|{statusString,-12}|{priority,-6}|{task,-20}|");
@@ -102,12 +102,49 @@ namespace todolist_CC
         /*
         Todo.PrintHelp Method VVV
         */
-        public static void PrintHelp() //<----------------METHOD_Help
+        public static void PrintHelp(string command) //<----------------METHOD_Help
         {
-            Console.WriteLine("Kommandon:");
-            Console.WriteLine("hjälp    lista denna hjälp");
-            Console.WriteLine("lista    lista att-göra-listan");
-            Console.WriteLine("sluta    spara att-göra-listan och sluta");
+            string[] arg = command.Split(' ');
+            if (arg.Length < 2)
+            {
+                WriteLine("Commands(type help 'command' for more information if the command got * after it's name):");
+                WriteLine("help    dis help, yis");
+                WriteLine("list*    lists active items in Todo-list");
+                WriteLine("describe*    lists active items in Todo-list with description");
+                WriteLine("new    create new item. 'new test' created a item with the name test");
+                WriteLine("edit    lets you edit an item. 'edit test' edits item with name test");
+                WriteLine("copy    copies item and sets status to active. 'copy test' copies test and sets it to active");
+                WriteLine("save    save current loaded list");
+                WriteLine("load    loads default .lis. todo.lis");
+                WriteLine("activate    activate item. 'activate test' sets test to active");
+                WriteLine("done    set item status to done. 'done test' set test status to done.");
+                WriteLine("wait    set item status to waiting. 'wait test' set test status to waiting");
+                WriteLine("stop    save and close");
+            }
+            else if (arg.Length > 1)
+            {
+                switch(arg[1])
+                {
+                    case "list":
+                        WriteLine("'list ': 'all': lists all items w/o description.\n'waiting': lists all items with status waiting.\n'done': lists all items with status done.");
+                        break;
+                    case "describe":
+                        WriteLine("'describe ': 'all': lists all items.\n'waiting': lists all items with status waiting.\n'done': lists all items with status done.\n!!With Description!!");
+                        break;
+                    case "new":
+                        WriteLine("'new': create item.\n'new test': create item with name 'test'");
+                        break;
+                    case "save":
+                        WriteLine("'save': save list to 'todo.lis'(default).\n'save test.lis': saves list to file 'test.lis'.");
+                        break;
+                    case "load":
+                        WriteLine("'load': load list 'todo.lis'(default).\n'load test.lis': loads list 'test.lis'.");
+                        break;
+                    default:
+                        Console.WriteLine($"Unknown command: {command}");
+                        break;
+                }
+            }
         }
         /*
         Todo.newTodo Method VVV
@@ -182,6 +219,7 @@ namespace todolist_CC
             string file = "todo.lis";
             string[] arg = command.Split(' ');
             if (arg.Length > 1) { file = arg[1]; }
+            list.Clear();
             Write($"Reading from file {file} ... ");
             StreamReader sr = new StreamReader(file);
             int numRead = 0;
@@ -213,8 +251,21 @@ namespace todolist_CC
                     sw.WriteLine($"{item.status}|{item.priority}|{item.task}|{item.taskDescription}");
                 }
             }
-            Todo.loadTodo(file);
-
+        }
+        public static void setStatus(string command)
+        {
+            int setTo;
+            string[] arg = command.Split(' ', 2);
+            string name = arg[1];
+            if (arg[0] == "active") { setTo = 1; }
+            else if (arg[0] == "waiting") { setTo = 2; }
+            else if (arg[0] == "done") { setTo= 3; }
+            else { setTo = -1; }
+            if (setTo == -1) { WriteLine("Error: This will never happen, but you never know."); return; }
+            foreach (TodoItem item in list)
+            {
+                if (item.task == name) { item.status = setTo; }
+            }
         }
     }
     class MainClass //<-------------------------------------------------------------------------------------------------------------------------MAIN/------------------------------------------------------------------------------------------------------------------------>
@@ -225,14 +276,14 @@ namespace todolist_CC
             string command;
             Console.WriteLine("Welcome to the Todo-list");
             Todo.loadTodo("load");
-            Todo.PrintHelp();
+            Todo.PrintHelp("help");
             do
             {
                 command = MyIO.ReadCommand("> ");
                 switch (command)
                 {
-                    case "help":
-                        Todo.PrintHelp();
+                    case String A when A.StartsWith("help"):
+                        Todo.PrintHelp(command);
                         break;
                     case "stop":
                         Todo.saveTodo("save");
@@ -259,6 +310,15 @@ namespace todolist_CC
                         break;
                     case String A when A.StartsWith("copy"):
                         Todo.copyTodo(command);
+                        break;
+                    case String A when A.StartsWith("active"):
+                        Todo.setStatus(command);
+                        break;
+                    case String A when A.StartsWith("waiting"):
+                        Todo.setStatus(command);
+                        break;
+                    case String A when A.StartsWith("done"):
+                        Todo.setStatus(command);
                         break;
                     default:
                         Console.WriteLine($"Unknown command: {command}");
