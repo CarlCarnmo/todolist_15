@@ -51,11 +51,8 @@ namespace todolist_CC
                 int taskdL = 40; //40-65
                 foreach (TodoItem item in list)
                 {
-                    if (item.task.Length > 20) { taskL = item.task.Length; }
-                }
-                foreach (TodoItem item in list)
-                {
-                    if (item.taskDescription.Length > 40) { taskdL = item.taskDescription.Length; }
+                    if (item.task.Length > taskL) { taskL = item.task.Length; }
+                    if (item.taskDescription.Length > taskdL) { taskdL = item.taskDescription.Length; }
                 }
                 string taskPlus = string.Concat(Enumerable.Repeat("-", taskL));
                 string taskdPlus = string.Concat(Enumerable.Repeat("-", taskdL));
@@ -69,13 +66,11 @@ namespace todolist_CC
                 Tuple<int, int> tuple = TodoItem.getCount();
                 int taskL = (tuple.Item1 - task.Length);
                 int taskdL = (tuple.Item2 - taskDescription.Length);
-
-
                 string statusString = StatusToString(status);
                 string taskPad = string.Concat(Enumerable.Repeat(" ", taskL));
-                //string taskdPad = string.Concat(Enumerable.Repeat(" ", taskdL));
+                string taskdPad = string.Concat(Enumerable.Repeat(" ", taskdL));
                 Write($"|{statusString,-12}|{priority,-6}|{task}{taskPad}|");
-                if (desc == true) { Write($"{taskDescription,-40}|"); }
+                if (desc == true) { Write($"{taskDescription}{taskdPad}|"); }
                 WriteLine();
             }
             public static void prtLoop(bool desc, bool active, bool wait, bool done)
@@ -93,7 +88,7 @@ namespace todolist_CC
         public static void Print(string command)
         {
             Tuple<int, int> tuple = TodoItem.getCount();
-            WriteLine($"task:{tuple.Item1}\ntaskdesc: {tuple.Item2}");
+            //WriteLine($"task:{tuple.Item1}\ntaskdesc: {tuple.Item2}");
             int taskL = tuple.Item1;
             int taskdL = tuple.Item2;
             string taskPlus = string.Concat(Enumerable.Repeat("-", taskL));
@@ -133,7 +128,7 @@ namespace todolist_CC
         /*
         Todo.PrintHelp Method VVV
         */
-        public static void PrintHelp(string command) //<----------------METHOD_Help
+        public static void PrintHelp(string command)
         {
             string[] arg = command.Split(' ');
             if (arg.Length < 2)
@@ -193,7 +188,6 @@ namespace todolist_CC
             WriteLine("Description(Max 65 letters): ");
             string desc = ReadLine();
             if (desc.Length > 65) { WriteLine("Error: To many letters."); return; }
-
             TodoItem item = new TodoItem(priority, task);
             item.status = status;
             item.taskDescription = desc;
@@ -235,7 +229,6 @@ namespace todolist_CC
                     string newTask = item.task;
                     int newStatus = item.status;
                     string newTaskdesc = item.taskDescription;
-
                     TodoItem item1 = new TodoItem(1, newTask);
                     item.status = newStatus;
                     item.taskDescription = newTaskdesc;
@@ -256,7 +249,6 @@ namespace todolist_CC
             Write($"Reading from file {file} ... ");
             StreamReader sr = new StreamReader(file);
             int numRead = 0;
-
             string line;
             while ((line = sr.ReadLine()) != null)
             {
@@ -266,7 +258,6 @@ namespace todolist_CC
             }
             sr.Close();
             WriteLine($"Read {numRead} rows.");
-
         }
         /*
         Todo.saveTodo Method VVV
@@ -305,7 +296,6 @@ namespace todolist_CC
     {
         public static void Main(string[] args)
         {
-
             string command;
             Console.WriteLine("Welcome to the Todo-list");
             Todo.loadTodo("load");
