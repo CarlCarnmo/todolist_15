@@ -13,14 +13,14 @@ namespace todolist_CC
 
         public const int Active = 1;
         public const int Waiting = 2;
-        public const int Ready = 3;
+        public const int Done = 3;
         public static string StatusToString(int status)
         {
             switch (status)
             {
                 case Active: return "Active";
                 case Waiting: return "Waiting";
-                case Ready: return "Done";
+                case Done: return "Done";
                 default: return "Error: Status unknown";
             }
         }
@@ -108,18 +108,18 @@ namespace todolist_CC
             if (arg.Length < 2)
             {
                 WriteLine("Commands(type help 'command' for more information if the command got * after it's name):");
-                WriteLine("help    dis help, yis");
-                WriteLine("list*    lists active items in Todo-list");
+                WriteLine("help         dis help, yis");
+                WriteLine("list*        lists active items in Todo-list");
                 WriteLine("describe*    lists active items in Todo-list with description");
-                WriteLine("new    create new item. 'new test' created a item with the name test");
-                WriteLine("edit    lets you edit an item. 'edit test' edits item with name test");
-                WriteLine("copy    copies item and sets status to active. 'copy test' copies test and sets it to active");
-                WriteLine("save    save current loaded list");
-                WriteLine("load    loads default .lis. todo.lis");
-                WriteLine("activate    activate item. 'activate test' sets test to active");
-                WriteLine("done    set item status to done. 'done test' set test status to done.");
-                WriteLine("wait    set item status to waiting. 'wait test' set test status to waiting");
-                WriteLine("stop    save and close");
+                WriteLine("new*         create new item. 'new test' created a item with the name test");
+                WriteLine("edit         lets you edit an item. 'edit test' edits item with name test");
+                WriteLine("copy         copies item and sets status to active. 'copy test' copies test and sets it to active");
+                WriteLine("save*        save current loaded list.");
+                WriteLine("load*        loads default .lis. todo.lis");
+                WriteLine("active       set item status to active. 'activate test' set test to active");
+                WriteLine("waiting      set item status to waiting item. 'waiting test' set test to waiting");
+                WriteLine("done         set item status to done. 'done test' set test status to done.");
+                WriteLine("stop         save and close");
             }
             else if (arg.Length > 1)
             {
@@ -293,10 +293,10 @@ namespace todolist_CC
                         Todo.Print(command);
                         WriteLine();
                         break;
-                    case string A when A.StartsWith("new"): //new 'task'
+                    case string A when A.StartsWith("new"):
                         Todo.newTodo(command);
                         break;
-                    case String A when A.StartsWith("describe"): //describe 'all'
+                    case String A when A.StartsWith("describe"):
                         Todo.Print(command);
                         break;
                     case String A when A.StartsWith("save"):
