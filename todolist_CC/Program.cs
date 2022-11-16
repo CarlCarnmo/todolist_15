@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Data;
 using System.IO;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using static System.Console;
@@ -204,14 +205,15 @@ namespace todolist_CC
             string file = "todo.lis";
             string[] arg = command.Split(' ');
             if (arg.Length > 1) { file = arg[1]; }
-
-            using (StreamWriter sw = new StreamWriter(file))
+            File.WriteAllText(file, String.Empty);
+            using (StreamWriter sw = new StreamWriter(file, false))
             {
                 foreach (TodoItem item in list)
                 {
                     sw.WriteLine($"{item.status}|{item.priority}|{item.task}|{item.taskDescription}");
                 }
             }
+            Todo.loadTodo(file);
 
         }
     }
