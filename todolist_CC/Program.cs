@@ -52,6 +52,9 @@ namespace todolist_CC
                 foreach (TodoItem item in list)
                 {
                     if (item.task.Length > 20) { taskL = item.task.Length; }
+                }
+                foreach (TodoItem item in list)
+                {
                     if (item.taskDescription.Length > 40) { taskdL = item.taskDescription.Length; }
                 }
                 string taskPlus = string.Concat(Enumerable.Repeat("-", taskL));
@@ -64,13 +67,15 @@ namespace todolist_CC
             public void print(bool desc)
             {
                 Tuple<int, int> tuple = TodoItem.getCount();
-                int taskL = (tuple.Item1 - task.Length)*-1;
-                int taskdL = (tuple.Item2 - taskDescription.Length)*-1;
+                int taskL = (tuple.Item1 - task.Length);
+                int taskdL = (tuple.Item2 - taskDescription.Length);
 
 
                 string statusString = StatusToString(status);
-                Write($"|{statusString,-12}|{priority,-6}|{task,-30}|");
-                if (desc == true) { Write($"{taskDescription,-65}|"); }
+                string taskPad = string.Concat(Enumerable.Repeat(" ", taskL));
+                //string taskdPad = string.Concat(Enumerable.Repeat(" ", taskdL));
+                Write($"|{statusString,-12}|{priority,-6}|{task}{taskPad}|");
+                if (desc == true) { Write($"{taskDescription,-40}|"); }
                 WriteLine();
             }
             public static void prtLoop(bool desc, bool active, bool wait, bool done)
