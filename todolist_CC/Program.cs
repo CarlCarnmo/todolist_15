@@ -45,14 +45,32 @@ namespace todolist_CC
                 task = field[2];
                 taskDescription = field[3];
             }
+            public static Tuple<int, int> getCount()
+            {
+                int taskL = 20; //20-30
+                int taskdL = 40; //40-65
+                foreach (TodoItem item in list)
+                {
+                    if (item.task.Length > 20) { taskL = item.task.Length; }
+                    if (item.taskDescription.Length > 40) { taskdL = item.taskDescription.Length; }
+                }
+                string taskPlus = string.Concat(Enumerable.Repeat("-", taskL));
+                string taskdPlus = string.Concat(Enumerable.Repeat("-", taskdL));
+                return Tuple.Create(taskL, taskdL);
+            }
             /*
              Todo.print Method VVV
              */
             public void print(bool desc)
             {
+                Tuple<int, int> tuple = TodoItem.getCount();
+                int taskL = (tuple.Item1 - task.Length)*-1;
+                int taskdL = (tuple.Item2 - taskDescription.Length)*-1;
+
+
                 string statusString = StatusToString(status);
-                Write($"|{statusString,-12}|{priority,-6}|{task,-20}|");
-                if (desc == true) { Write($"{taskDescription,-40}|"); }
+                Write($"|{statusString,-12}|{priority,-6}|{task,-30}|");
+                if (desc == true) { Write($"{taskDescription,-65}|"); }
                 WriteLine();
             }
             public static void prtLoop(bool desc, bool active, bool wait, bool done)
@@ -69,6 +87,14 @@ namespace todolist_CC
          */
         public static void Print(string command)
         {
+            Tuple<int, int> tuple = TodoItem.getCount();
+            WriteLine($"task:{tuple.Item1}\ntaskdesc: {tuple.Item2}");
+            int taskL = tuple.Item1;
+            int taskdL = tuple.Item2;
+            string taskPlus = string.Concat(Enumerable.Repeat("-", taskL));
+            string taskPlusTitle = string.Concat(Enumerable.Repeat("-", (taskL - 4)));
+            string taskdPlus = string.Concat(Enumerable.Repeat("-", taskdL));
+            string taskdPlusTitle = string.Concat(Enumerable.Repeat("-", (taskdL - 11)));
             bool desc = false;
             bool active = false;
             bool wait = false;
@@ -78,22 +104,22 @@ namespace todolist_CC
             if (arg.Length > 1 && arg[1] == "done") { done = true; }
             if (arg.Length > 1 && arg[1] == "all") { active = true; done = true; wait = true; }
             if (arg.Length == 1) { active = true; }
-            Write("|status      |prio  |namn                |");
+            Write($"|status      |prio  |namn{taskPlusTitle}|");
             switch (arg[0])
             {
                 case "list":
-                    WriteLine("\n|------------|------|--------------------|");
+                    WriteLine($"\n|------------|------|{taskPlus}|");
                     TodoItem.prtLoop(desc, active, wait, done);
-                    WriteLine("|------------|------|--------------------|");
+                    WriteLine($"|------------|------|{taskPlus}|");
                     break;
                 case "describe":
                     desc = true;
-                    WriteLine("beskrivning                             |");
-                    Write("|------------|------|--------------------|");
-                    WriteLine("----------------------------------------|");
+                    WriteLine($"beskrivning{taskdPlusTitle}|");
+                    Write($"|------------|------|{taskPlus}|");
+                    WriteLine($"{taskdPlus}|");
                     TodoItem.prtLoop(desc, active, wait, done);
-                    Write("|------------|------|--------------------|");
-                    WriteLine("----------------------------------------|");
+                    Write($"|------------|------|{taskPlus}|");
+                    WriteLine($"{taskdPlus}|");
                     break;
                 default:
                     break;
@@ -123,7 +149,7 @@ namespace todolist_CC
             }
             else if (arg.Length > 1)
             {
-                switch(arg[1])
+                switch (arg[1])
                 {
                     case "list":
                         WriteLine("'list ': 'all': lists all items w/o description.\n'waiting': lists all items with status waiting.\n'done': lists all items with status done.");
@@ -153,13 +179,15 @@ namespace todolist_CC
         {
             string task;
             if (command.Length > 3) { string substring = command.Substring(4); task = substring; }
-            else { WriteLine("Task: "); task = ReadLine(); }
+            else { WriteLine("Task(Max 30 letters): "); task = ReadLine(); }
+            if (task.Length > 30) { WriteLine("Error: To many letters."); return; }
             WriteLine("Priority(1-4): ");
             int priority = Convert.ToInt32(ReadLine());
             WriteLine("Status(1=Active, 2=Waiting, 3=Ready): ");
             int status = Convert.ToInt32(ReadLine());
-            WriteLine("Description: ");
+            WriteLine("Description(Max 65 letters): ");
             string desc = ReadLine();
+            if (desc.Length > 65) { WriteLine("Error: To many letters."); return; }
 
             TodoItem item = new TodoItem(priority, task);
             item.status = status;
@@ -259,7 +287,7 @@ namespace todolist_CC
             string name = arg[1];
             if (arg[0] == "active") { setTo = 1; }
             else if (arg[0] == "waiting") { setTo = 2; }
-            else if (arg[0] == "done") { setTo= 3; }
+            else if (arg[0] == "done") { setTo = 3; }
             else { setTo = -1; }
             if (setTo == -1) { WriteLine("Error: This will never happen, but you never know."); return; }
             foreach (TodoItem item in list)
