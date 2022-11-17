@@ -54,8 +54,6 @@ namespace todolist_CC
                     if (item.task.Length > taskL) { taskL = item.task.Length; }
                     if (item.taskDescription.Length > taskdL) { taskdL = item.taskDescription.Length; }
                 }
-                string taskPlus = string.Concat(Enumerable.Repeat("-", taskL));
-                string taskdPlus = string.Concat(Enumerable.Repeat("-", taskdL));
                 return Tuple.Create(taskL, taskdL);
             }
             /*
@@ -88,7 +86,6 @@ namespace todolist_CC
         public static void Print(string command)
         {
             Tuple<int, int> tuple = TodoItem.getCount();
-            //WriteLine($"task:{tuple.Item1}\ntaskdesc: {tuple.Item2}");
             int taskL = tuple.Item1;
             int taskdL = tuple.Item2;
             string taskPlus = string.Concat(Enumerable.Repeat("-", taskL));
@@ -344,7 +341,7 @@ namespace todolist_CC
                         Todo.setStatus(command);
                         break;
                     default:
-                        Console.WriteLine($"Unknown command: {command}");
+                        WriteLine($"Unknown command: {command}");
                         break;
                 }
             }
@@ -355,8 +352,8 @@ namespace todolist_CC
     {
         static public string ReadCommand(string prompt)
         {
-            Console.Write(prompt);
-            return Console.ReadLine();
+            Write(prompt);
+            return ReadLine();
         }
         static public bool Equals(string rawCommand, string expected)
         {
